@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>每日菜单</title>
+    <link rel="stylesheet" type="text/css" href="./dailymenu.css" />
+    <script src="./jquery-1.11.0.min.js"></script>
+    <script src="./papaparse.min.js"></script>
+</head>
+<body>
+    <div id="categories" hidden="hidden">
+        <p><button onclick="hitme()">开始点菜</button></p>
+    </div>
+    <div id="dishes" hidden="hidden">
+    </div>
+
+    <script>
+
+    function setCategory(x) {
+        var dom = $('input#' + x);
+        var category = dom.attr('id');
+        var value = parseInt(dom.val());
+        if (isNaN(value) || value < 0) {
+            alert('please enter a number bigger than zero!')
+            dom.val('0')
+            dom.focus()
+        }
+        else {
+            main[category]['count'] = value
+        }
+    }
+
+    function init() {
+        Papa.parse('./dishes.csv', {
+            download: true,
+            complete: function(results) {
+                dishes = results.data;
+                for(var i = 1, _l = dishes.length-1; i < _l; i++) {
+                    var item = dishes[i];
+                    var name = item[0];
+                    var category = item[1];
+                    main[category]['dish'].push(name);
+                }
+                $('div#categories').prepend(html_categories);
+                $('div#categories').show();
+            }
+        });
+    }
+
+    function getRandomSubarray(arr, size) {
+        var shuffled = arr.slice(0), i = arr.length, temp, index;
+        while (i--) {
+            index = Math.floor((i + 1) * Math.random());
+            temp = shuffled[index];
+            shuffled[index] = shuffled[i];
+            shuffled[i] = temp;
+        }
+        return shuffled.slice(0, size);
+    }
+
+    function hitme() {
+        html_dishes = '';
+        for(var i = 0, _l_1 = keys.length; i < _l_1; i++) {
+            if(main[keys[i]]['count'] > 0) {
+                html_dishes += '<h1>' + keys[i] + '</h1><p>';
+                var dishes = getRandomSubarray(main[keys[i]]['dish'], main[keys[i]]['count']);
+                for(var j = 0, _l_2 = dishes.length; j < _l_2; j++) {
+                    html_dishes += dishes[j] + ';'
+                }
+                html_dishes += '</p>'
+            }
+        }
+        $('div#dishes').html(html_dishes);
+        $('div#dishes').show();
+    }
+
+    var dishes
+    var categories
+    var main = {}
+    var keys = []
+    var html_dishes = ''
+    var html_categories = ''
+
+    Papa.parse('./categories.csv', {
+        download: true,
+        complete: function(results) {
+            categories = results.data;
+            html_categories=''
+            for(var i = 1, _l = categories.length-1; i < _l; i++) {
+                var item = categories[i];
+                var category = item[0];
+                var count = item[1];
+                html_categories += '<tr><td>' + category + '</td><td><input type="text" class = "category" id="' + category + '" value="' + count + '" onchange=setCategory(this.id) /></td></tr>';
+                main[category] = {count:count, dish:[]};
+                keys.push(category);
+            }
+            init();
+        }
+    });
+
+    </script>
+</body>
+</html>
