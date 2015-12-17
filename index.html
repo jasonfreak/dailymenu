@@ -2,10 +2,14 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>每日菜单</title>
     <link rel="stylesheet" type="text/css" href="./dailymenu.css" />
     <script src="./jquery-1.11.0.min.js"></script>
     <script src="./papaparse.min.js"></script>
+    <!--[if lt IE 9]> 
+    <script src="./css3-mediaqueries.js"></script> 
+    <![endif]-->
 </head>
 <body>
     <div id="categories" hidden="hidden">
@@ -23,6 +27,7 @@
         if (isNaN(value) || value < 0) {
             alert('please enter a number bigger than zero!')
             dom.val('0')
+            main[category]['count'] = 0
             dom.focus()
         }
         else {
@@ -39,7 +44,9 @@
                     var item = dishes[i];
                     var name = item[0];
                     var category = item[1];
-                    main[category]['dish'].push(name);
+                    if(main[category]) {
+                        main[category]['dish'].push(name);
+                    }
                 }
                 $('div#categories').prepend(html_categories);
                 $('div#categories').show();
@@ -85,7 +92,7 @@
         download: true,
         complete: function(results) {
             categories = results.data;
-            html_categories=''
+            html_categories = '';
             for(var i = 1, _l = categories.length-1; i < _l; i++) {
                 var item = categories[i];
                 var category = item[0];
